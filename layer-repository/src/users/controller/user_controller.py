@@ -1,9 +1,10 @@
 from flask import Blueprint, jsonify, request
 from users.model.user_model import User
+from users.repository.memory_repository import UserRepository
 
 
 blueprint = Blueprint('user_controller', __name__)
-users = []
+repository = UserRepository()
 
 
 # Endpoint to insert users
@@ -14,13 +15,13 @@ def insert_user():
 
     # Create a new user
     user = User(
-        id=len(users) + 1,
+        id=len(repository.users) + 1,
         name=user_data["name"],
         email=user_data["email"]
     )
 
     # Add the new user to the list of users
-    users.append(user)
+    repository.add(user)
 
     # Return the newly inserted user
     return jsonify(user)
@@ -30,7 +31,7 @@ def insert_user():
 @blueprint.route("/users/<user_id>", methods=["GET"])
 def get_user(user_id):
     # Find the user with the given user_id
-    user = next((user for user in users if user.id == int(user_id)), None)
+    user = repository.get(user_id)
 
     # If the user is not found, return a 404 error
     if user is None:
